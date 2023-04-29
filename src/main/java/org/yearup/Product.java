@@ -2,46 +2,47 @@ package org.yearup;
 
 public class Product
 {
-    private int Id;
-    private String Name;
-    private double Price;
+    private String id;
+    private String name;
+    private double price;
 
 
-    public Product(int id, String name, double price)
+    public Product(String id, String name, double price)
     {
-        Id = id;
-        Name = name;
-        Price = price;
+        this.id = id;
+        this.name = name;
+        this.price = price;
     }
 
-    public int getId()
+    public String getId()
     {
-        return Id;
+        return id;
     }
 
-    public void setId(int id)
+    public void setId(String id)
     {
-        Id = id;
+        this.id = id;
     }
 
     public String getName()
     {
-        return Name;
+        return name;
     }
 
     public void setName(String name)
     {
-        Name = name;
+        this.name = name;
     }
 
     public double getPrice()
     {
-        return Price;
+        return price;
     }
 
     public void setPrice(double price)
     {
-        Price = price;
+        this.price = price;
     }
+
 
 }
