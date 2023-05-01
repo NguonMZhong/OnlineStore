@@ -11,4 +11,6 @@ to home screen.
     'Not enough for total payment. Please enter a larger'.
     -If enter sufficient amount then user will receive their recipe of their purchase.
 
-### home_screen_onlinestore.png
+### Home Screen
+
+![Home Screen] (Images/home_screen_onlinestore.png)
