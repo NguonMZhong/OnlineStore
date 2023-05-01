@@ -44,5 +44,11 @@ public class Product
         this.price = price;
     }
 
+    @Override
+    public String toString()
+    {
+        return String.format("%s|%s|%.2f", id, name, price);
+    }
+
 
 }

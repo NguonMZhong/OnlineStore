@@ -1,152 +1,143 @@
 package org.yearup;
 
-import java.io.*;
-import java.sql.SQLOutput;
-import java.util.ArrayList;
-import java.util.InputMismatchException;
-import java.util.Scanner;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.util.*;
 
 public class OnlineStoreApp
 {
-    //Global variables
-    Scanner scanner = new Scanner(System.in);
-    //private final Product[] products = new Product[10];
-    public static ArrayList<Product> cart = new ArrayList<>();
+    // Global variables for use in multiple functions
+    final static public Scanner scanner = new Scanner(System.in);
+    final static HashMap<String, Product> inventory = new HashMap<>();
+    final static ArrayList<Product> cart = new ArrayList<>();
 
     public void run()
     {
-        //ArrayList<Product> cart = loadInventory();
-
+        //load items from the csv file into inventory Map
+        loadInventory();
         homeScreen();
-
-        //for (Product product : cart)
-        {
-            //System.out.println(product.getId());
-            //System.out.println(product.getName());
-            //System.out.println(product.getPrice());
-        }
     }
 
-    public static ArrayList<Product> loadInventory()
+    public void loadInventory()
     {
-        //ArrayList<Product> cart = new ArrayList<>();
+        System.out.println("Welcome to Barns Shop!");
+        System.out.println();
 
-        FileInputStream stream;
-        Scanner fileScanner = null;
-        try
+        try (Scanner reader = new Scanner(new File("inventory.csv")))
         {
-
-            stream = new FileInputStream("inventory.csv");
-            fileScanner = new Scanner(stream);
-
-            System.out.println("Welcomes to Barns Online Store! ");
-            System.out.println();
-
-            System.out.println("ID\t\tName\t\t\t\t\t\t\tPrice");
-            fileScanner.nextLine();
-
-            while (fileScanner.hasNext())
+            while (reader.hasNextLine())
             {
-                String line = fileScanner.nextLine();
+                String line = reader.nextLine();
+                String[] split = line.split("\\|");
 
-                String[] columns = line.split("\\|");
-                String id = columns[0];
-                String name = columns[1];
-                double price = Double.parseDouble(columns[2]);
-                System.out.printf("%s\t%-30s\t%.2f\n", id, name, price);
+                String id = split[0];
+                String name = split[1];
+                double price = Double.parseDouble(split[2]);
 
-
-                //create book and add to ArrayList
                 Product product = new Product(id, name, price);
-                cart.add(product);
-            }
 
-        } catch (IOException e)
-        {
-            System.out.println("Error reading file: " + e.getMessage());
-        } finally
-        {
-            if (fileScanner != null)
-            {
-                fileScanner.close();
+                inventory.put(String.valueOf(id), product);
             }
+        } catch (FileNotFoundException e)
+        {
+            System.out.println("Error: " + e);
         }
-        return cart;
-
     }
+
     public void homeScreen()
     {
-        System.out.println("Please select from the options below");
-        System.out.println("1) Show products");
-        System.out.println("2) Show cart");
-        System.out.println("0) Exit");
-        System.out.print("Enter: ");
-        int response = scanner.nextInt();
-        scanner.nextLine();
-
         while (true)
         {
+            System.out.println();
+            System.out.println("Please select from the options below");
+            System.out.println("1) Show products");
+            System.out.println("2) Show cart");
+            System.out.println("0) Exit");
+            System.out.print("Enter: ");
+            int response = scanner.nextInt();
+            scanner.nextLine();
+
             switch (response)
             {
-                case 1:
+                case 1 ->
+                {
                     System.out.println("Showing the products...\n");
-                    loadInventory();
-                    displayProduct();
-
-                    return;
-                case 2:
+                    displayProducts();
+                }
+                case 2 ->
+                {
                     System.out.println("Showing cart...\n");
                     displayCart();
-
                     return;
-                case 0:
+                }
+                case 0 ->
+                {
                     System.out.println("Exit");
-
                     return;
-                default:
-                    System.out.println("Invalid option. Please try again.\n");
+                }
+                default -> System.out.println("Invalid option. Please try again.\n");
             }
         }
+
     }
-    private void displayProduct()
-    //if product ID selected, should add the product to cart and then display home screen again
+
+    public void displayProducts()
     {
         System.out.println();
-        System.out.println("Enter the ID of the product you wish to put in your cart: ");
-        String input = scanner.nextLine();
 
-        //If user enter X, return to home screen
-        if (input.equalsIgnoreCase("x"))
+        for (Product product : inventory.values())
         {
-            return;
-
-            // Find product with matching ID
+            System.out.println(product);
         }
-        Product selectedProduct = null;
-        for (Product product : cart.toArray(new Product[0]))
-        {
-            if (product.getId().equals(input))
-            {
-                selectedProduct = product;
-                break;
-            }
-        }
-        if (selectedProduct != null)
-        {
-            cart.add(selectedProduct);
-            System.out.println(selectedProduct.getName() + " has been added to your cart.");
-            homeScreen();
-        } else
-        {
-            System.out.println("Invalid input. Please try again.");
-            displayProduct();
-        }
-
+        respondProduct();
     }
 
-    public void displayCart()
-    { //maybe use hashmap
-        System.out.println("Cart: ");
+    public void respondProduct()
+    {
+        {
+            String respond;
+            do
+            {
+                System.out.println("Enter the product ID or enter '0' to return to home screen.");
+                System.out.print("Enter: ");
+
+                respond = scanner.nextLine();
+                if (respond.matches("[A-Z0-9]+"))
+                {
+                    if (inventory.get(respond) != null)
+                    {
+                        // Add item to cart
+                        Product product = inventory.get(respond);
+                        System.out.println("This " + product.getName() + " has been added to your cart.\n");
+                        cart.add(product);
+
+                    } else if (respond.equals("0"))
+                    {
+                        // Return to home screen
+                        System.out.println("Returning to home screen...\n");
+                        homeScreen();
+                        return;
+
+                    } else
+                    {
+                        System.out.println("Invalid input. Please try again.");
+                    }
+                } else
+                {
+                    System.out.println("Please enter a valid number or '0' to return to home screen.");
+                }
+            } while (!respond.equals("0"));
+
+            displayCart();
+        }
+    }
+
+    private void displayCart()
+    {
+        System.out.println("Your Current Cart: ");
 
         double total = 0;
         for (Product product : cart)
@@ -154,7 +145,83 @@ public class OnlineStoreApp
             System.out.println(product.getName() + " - $" + product.getPrice());
             total += product.getPrice();
         }
-        System.out.println("Total: $" + total);
+        DecimalFormat df = new DecimalFormat("0.00");
+        System.out.println("Total: $" + df.format(total) + "\n");
+
+        boolean continueToCheckout = true;
+        while (continueToCheckout)
+        {
+            continueToCheckout = respondCart(total);
+        }
+
+        homeScreen();
+    }
+
+    public boolean respondCart(double total)
+    {
+        System.out.println("Please enter 'checkout' or 'x' to return to the home screen: ");
+        String input = scanner.nextLine();
+
+        if (input.equalsIgnoreCase("x"))
+        {
+            return false;
+        } else if (input.equalsIgnoreCase("checkout"))
+        {
+            System.out.println("Checking out...");
+            System.out.println("Thank you for your purchase! Your total is $" + total);
+            checkOut(total);
+            cart.clear(); // clear the cart after checkout
+            return false;
+        } else
+        {
+            System.out.println("Invalid input. Please try again.");
+            return respondCart(total);
+        }
 
     }
+    public static void checkOut(double total)
+    {
+        double respond = 0;
+        boolean validInput = false;
+        do
+        {
+            System.out.print("Enter amount paid: $");
+            try
+            {
+                respond = scanner.nextDouble();
+                validInput = true;
+            } catch (InputMismatchException e)
+            {
+                System.out.println("Invalid input. Please enter a valid number.\n");
+                scanner.nextLine();
+            }
+        } while (!validInput);
+
+        BigDecimal totalDecimal = BigDecimal.valueOf(total);
+        BigDecimal respondDecimal = BigDecimal.valueOf(respond);
+        BigDecimal remainderDecimal = totalDecimal.subtract(respondDecimal).setScale(2, RoundingMode.HALF_DOWN);
+
+        double remainder = remainderDecimal.doubleValue();
+
+        if (remainder <= 0)
+        {
+            // Change due
+            remainder = Math.abs(remainder);
+            System.out.println("Receipt");
+            for (Product product : cart)
+            {
+                System.out.println("-" + product.getName());
+            }
+            System.out.println("Change due: " + remainder + "\n");
+            cart.clear();
+
+        } else
+        {
+            System.out.println("Not enough for total payment. Please enter a larger amount.\n");
+            checkOut(total);
+        }
+    }
 }
+
+
+
