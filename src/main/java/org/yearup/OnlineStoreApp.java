@@ -9,14 +9,13 @@ import java.util.*;
 
 public class OnlineStoreApp
 {
-    // Global variables for use in multiple functions
+    // Global variables
     final static public Scanner scanner = new Scanner(System.in);
     final static HashMap<String, Product> inventory = new HashMap<>();
     final static ArrayList<Product> cart = new ArrayList<>();
 
     public void run()
     {
-        //load items from the csv file into inventory Map
         loadInventory();
         homeScreen();
     }
@@ -170,7 +169,7 @@ public class OnlineStoreApp
             System.out.println("Checking out...");
             System.out.println("Thank you for your purchase! Your total is $" + total);
             checkOut(total);
-            cart.clear(); // clear the cart after checkout
+            cart.clear(); 
             return false;
         } else
         {
